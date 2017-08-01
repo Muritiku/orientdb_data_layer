@@ -9,6 +9,7 @@ from pyorient.ogm import property
 initial_drop = True  # initial_drop used to DROP DATABASE when connected (to rebuild data schema)
 data_connection.connect_database('plocal://<ip_address>:2424/<database_name>', '<username>', '<password>', initial_drop)
 
+
 # Describe your database schema (in database will be created correspondent object types)
 
 # Base class for Graph vertices (V) (Nodes or Documents)
@@ -101,3 +102,5 @@ rec:
   ]
 }
 '''
+# Also, you may use direct calls to current graph object's methods. Graph can be accessed by:
+_graph = data_connection.get_graph()
