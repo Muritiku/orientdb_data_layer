@@ -181,6 +181,15 @@ Repository base methods description:
         :return: list of MODEL OBJECTS
         """
 
+    get_by_tree(query_dict, broker= None):
+        """
+        get records by query dict with filtering by Link[ed] objects (at any level)
+        Example:
+        get_by_tree(dict(id=1, parent=dict(name='parentname')))
+        :param query_dict: dictionary of values for records searching
+        :return: list of MODEL OBJECTS
+        """
+
     update(query_dict, prop_dict):
         """
         update records in database
