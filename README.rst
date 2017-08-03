@@ -15,7 +15,11 @@ Introduction
     orientdb_data_layer is the easy to use framework for data layer organisation for working with OrientDB
         It uses `PyOrient module <http://orientdb.com/docs/last/PyOrient.html>`_
 
-        And provides some additional functionality (in current state)
+        And provides some additional functionality (look at next section)
+
+New features history by version
+-------------------------------
+        [0.32]
         
         + The ability to organize code more structurally in an architectural sense
         
@@ -26,6 +30,10 @@ Introduction
         + The abitlity to work with model objects or abstract dictionaries (to get fully hashable results)
         
         + JSON results output with including linked objects
+
+        [0.4.0]
+
+        + get_by_tree(query_dict) method to filter objects by Link
 
 Installation
 ------------
@@ -105,7 +113,7 @@ Usage example:
     })
 
     sub_record = _subNodeRep.add({
-        'id': 1,
+        'id': 21,
         'parent_node': parent_record,
         'name': 'child'
     })
@@ -113,12 +121,22 @@ Usage example:
     # and now we may obtain the records by filtering:
     # this will get all records of type CustomSubNode with 'id' = 1
     rec = _subNodeRep.get({
-        'id': 1
+        'id': 21
     })
+
+    # From ver[0.4.0] you may use get_by_tree(query_dict) method to filter objects by Link
+    # This works with unlimited count of levels
+    rec = _subNodeRep.get_by_tree({
+        'parent_node': {
+            'id': 1
+        }
+    })
+    # rec = list of CustomSubNode when parent_node.id == 1
+
     # rec is list of CustomSubNode objects (look at OGM description in pyorient for details)
     # or we may return result as JSON (with linked parent record by our schema)
     rec = _subNodeRep.get({
-        'id': 1
+        'id': 21
     }, result_JSON = True)
 
     '''
@@ -129,7 +147,7 @@ Usage example:
         {
           "@rid": "#45:0",
           "@version": 1,
-          "id": 1,
+          "id": 21,
           "parent_node": {
             "@rid": "#33:0",
             "@version": 1,

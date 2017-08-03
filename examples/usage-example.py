@@ -9,7 +9,6 @@ from pyorient.ogm import property
 initial_drop = True  # initial_drop used to DROP DATABASE when connected (to rebuild data schema)
 data_connection.connect_database('plocal://<ip_address>:2424/<database_name>', '<username>', '<password>', initial_drop)
 
-
 # Describe your database schema (in database will be created correspondent object types)
 
 # Base class for Graph vertices (V) (Nodes or Documents)
@@ -32,10 +31,12 @@ class CustomSubNode(NodeBase):
     parent_node = property.Link(mandatory=True, nullable=False, linked_to=CustomNode)
     name = property.String()
 
-#  create-update/register database schema
+
+# create-update/register database schema
 #  refresh_models - will refresh/update database schema
 #  attach_models - will attach current model to existing database schema
 data_connection.refresh_models()
+
 
 # Now database was refreshed and it contains 2 Nodes (by our declaration)
 
@@ -45,15 +46,14 @@ data_connection.refresh_models()
 
 
 class CustomNodeRepository(RepositoryBase):
-
     def __init__(self):
         super().__init__(CustomNode)  # here should be passed Node type for repository
 
 
 class CustomSubNodeRepository(RepositoryBase):
-
     def __init__(self):
         super().__init__(CustomSubNode)
+
 
 # And now we may use our repositories (Or add some additional functionality in them - if needed)
 
@@ -66,7 +66,7 @@ parent_record = _nodeRep.add({
 })
 
 sub_record = _subNodeRep.add({
-    'id': 1,
+    'id': 21,
     'parent_node': parent_record,
     'name': 'child'
 })
@@ -74,13 +74,23 @@ sub_record = _subNodeRep.add({
 # and now we may obtain the records by filtering:
 # this will get all records of type CustomSubNode with 'id' = 1
 rec = _subNodeRep.get({
-    'id': 1
+    'id': 21
 })
+
+# From ver[0.4.0] you may use get_by_tree(query_dict) method to filter objects by Link
+# This works with unlimited count of levels
+rec = _subNodeRep.get_by_tree({
+    'parent_node': {
+        'id': 1
+    }
+})
+# rec = list of CustomSubNode when parent_node.id == 1
+
 # rec is list of CustomSubNode objects (look at OGM description in pyorient for details)
 # or we may return result as JSON (with linked parent record by our schema)
 rec = _subNodeRep.get({
-    'id': 1
-}, result_JSON = True)
+    'id': 21
+}, result_JSON=True)
 
 '''
 rec:
@@ -90,7 +100,7 @@ rec:
     {
       "@rid": "#45:0",
       "@version": 1,
-      "id": 1,
+      "id": 21,
       "parent_node": {
         "@rid": "#33:0",
         "@version": 1,

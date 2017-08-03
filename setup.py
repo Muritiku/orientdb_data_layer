@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='orientdb_data_layer',
-      version='0.32',
+      version='0.4.0',
       description='Data layer provider for OrientDB. (ORM/Repository/helpers)',
       long_description='Data layer provider for OrientDB. Easy to use ORM and Repository provider for OrientDB (with using pyorient)',
       classifiers=[
