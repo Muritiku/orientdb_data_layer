@@ -18,7 +18,7 @@ Introduction
         And provides some additional functionality (look at next section)
 
 New features history by version
------====----------------------
+-------------------------------
         [0.32]
         
         + The ability to organize code more structurally in an architectural sense
