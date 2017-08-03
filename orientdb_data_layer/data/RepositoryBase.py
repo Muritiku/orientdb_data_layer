@@ -1,4 +1,5 @@
 from ..data_connection import get_graph, is_connected as is_data_connected
+from pyorient.ogm.property import Link
 
 
 class RepositoryBase(object):
@@ -11,10 +12,7 @@ class RepositoryBase(object):
         if is_data_connected():
             if self.__graph is None or self.__broker is None:
                 self.__graph = get_graph()
-                if hasattr(self.__model_type, 'element_plural'):
-                    self.__broker = getattr(self.__graph, self.__model_type.element_plural)
-                elif hasattr(self.__model_type, 'label'):
-                    self.__broker = getattr(self.__graph, self.__model_type.label)
+                self.__broker = self.__model_type.objects
             return self.__graph is not None and self.__broker is not None
         return False
 
@@ -47,6 +45,56 @@ class RepositoryBase(object):
                 return "{[" + ",".join(json_list) + "]}"
             else:
                 return [obj for obj in self.__broker.query(**query_dict)]
+
+    def get_by_tree(self, query_dict, broker= None):
+        """
+        get records by query dict with filtering by Link[ed] objects (at any level)
+        Example:
+        get_by_tree(dict(id=1, parent=dict(name='parentname')))
+        :param query_dict: dictionary of values for records searching
+        :return: list of MODEL OBJECTS
+        """
+        if self.is_connected():
+            if broker is None:
+                broker = self.__broker
+            non_links_dict = {}
+            linked = {}
+
+            for key in query_dict:
+                if isinstance(query_dict[key], dict):
+                    atr = getattr(broker.element_cls, key)
+                    if isinstance(atr, Link):
+                        linked_ids = [obj._id for obj in self.get_by_tree(query_dict[key], broker=atr.linked_to.objects)]
+                        if len(linked_ids) == 0:
+                            return []
+                        else:
+                            linked[key] = linked_ids
+                else:
+                    non_links_dict[key] = query_dict[key]
+
+            result = []
+            if len(non_links_dict) > 0:
+                result = [obj for obj in broker.query(**non_links_dict)]
+            elif len(linked) > 0:
+                atr , col = linked.popitem()
+                for val in col:
+                    query = dict()
+                    query[atr] = val
+                    result += [obj for obj in broker.query(**query)]
+
+            if len(result) == 0:
+                return []
+            else:
+                for atr in linked:
+                    tmp = []
+                    for val in linked[atr]:
+                        tmp += [obj for obj in result if str(obj._props[atr]) == val]
+                    if len(tmp) == 0:
+                        return []
+                    else:
+                        result = tmp
+
+            return result
 
     def update(self, query_dict, prop_dict):
         """
